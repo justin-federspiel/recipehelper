@@ -13,15 +13,14 @@ namespace APICallHandler
 {
     public class TagAPI
     {
-        private readonly ApplicationDbContext _context; //Should this have an ApplicationDbContext?  Shouldn't this be dealt with elsewhere?        
-
-        public TagAPI(ApplicationDbContext context)
+        
+        public TagAPI()
         {
-            this._context = context;
         }
 
         public async Task<Tag[]> GetMine(AuthenticationToken user, int page = 0, int count = 100)
         {
+            using ApplicationDbContext _context = new ApplicationDbContext();
             var t = _context.Tags
                 .Where(t => t.IngredientTags.Any(it => it.CookId == user.ApplicationWideId) || t.RecipeTags.Any(rt => rt.Recipe.CookId == user.ApplicationWideId))
                 .Skip(page * count)
@@ -50,10 +49,9 @@ namespace APICallHandler
                         await context.Response.WriteAsJsonAsync(new { ResponseCode = 400, Message = "Either couldn't read page or count requested, or page was requested and count (per page) wasn't." });
                     }
                     else
-                    {
-                        using ApplicationDbContext ctx = new ApplicationDbContext();
+                    {                        
                         AuthenticationToken tokenUser = new AuthenticationToken { ApplicationWideId = id, ApplicationWideName = (context.Request.Query.ContainsKey("name")) ? context.Request.Query["name"].ToString() : "" };
-                        TagAPI api = new TagAPI(ctx);
+                        TagAPI api = new TagAPI();
                         await context.Response.WriteAsJsonAsync(api.GetMine(tokenUser, page, count));
                     }
                 }

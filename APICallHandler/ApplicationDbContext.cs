@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Models;
 
 namespace APICallHandler
@@ -11,22 +14,28 @@ namespace APICallHandler
     public class ApplicationDbContext : DbContext { 
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-        {
+        {            
         }
-        
+
         public ApplicationDbContext()
         {
-
         }
         
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            
             if (!optionsBuilder.IsConfigured)
             {
-                string connectionString = "Data Source=DESKTOP-C5N5TVS;Initial Catalog=BlazorLearner;Integrated Security=True;Pooling=False"; // was Configuration.GetConnectionString("DefaultConnection")
+
+                IConfigurationRoot configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
+                var connectionString = configuration.GetConnectionString("MainDatabaseEdit");
                 optionsBuilder.UseSqlServer(connectionString);
+                
             }
-        }
+        } 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

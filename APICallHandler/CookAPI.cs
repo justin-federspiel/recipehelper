@@ -16,15 +16,15 @@ namespace APICallHandler
     public class CookAPI
     {
 
-        private readonly ApplicationDbContext _context; //Should this have an ApplicationDbContext?  Shouldn't this be dealt with elsewhere?
 
-        public CookAPI(ApplicationDbContext context)
+        public CookAPI()
         {
-            this._context = context;
+            
         }
 
         public async Task<Cook[]> GetAll(AuthenticationToken user, int page = 0, int count = 100)
         {
+            using ApplicationDbContext _context = new ApplicationDbContext();
             var t =  _context.Cooks                
                 .Skip(page * count)
                 .Take(count);
@@ -34,18 +34,21 @@ namespace APICallHandler
 
         public async Task<Cook> GetOne(AuthenticationToken user, long id = 0)
         {
+            using ApplicationDbContext _context = new ApplicationDbContext();
             Cook result = await _context.Cooks.SingleOrDefaultAsync(c => c.Id == id);
             return result;
         }
 
         public async Task<Cook> GetOneByName(AuthenticationToken user, string name = "")
         {
+            using ApplicationDbContext _context = new ApplicationDbContext();
             Cook result = await _context.Cooks.Where(c => c.Name == name).FirstOrDefaultAsync<Cook>();
             return result;
         }
 
         public async Task<int> Update(AuthenticationToken user, long id = 0, string name = "")
         {
+            using ApplicationDbContext _context = new ApplicationDbContext();
             Cook updateMe = new Cook { Id = id, Name = name };
             _context.Cooks.Update(updateMe);
             int numberUpdated = await _context.SaveChangesAsync();
@@ -54,6 +57,7 @@ namespace APICallHandler
 
         public async Task<int> Create(AuthenticationToken user, string name = "")
         {
+            using ApplicationDbContext _context = new ApplicationDbContext();
             Cook makeMe = new Cook { Name = name };
             _context.Cooks.Add(makeMe);
             int numberCreated = await _context.SaveChangesAsync();
@@ -62,6 +66,7 @@ namespace APICallHandler
 
         public async Task<int> Delete(AuthenticationToken user, long id = 0)
         {
+            using ApplicationDbContext _context = new ApplicationDbContext();
             Cook deleteMe = new Cook { Id = id };
             _context.Cooks.Remove(deleteMe);
             int numberDeleted = await _context.SaveChangesAsync();
@@ -80,8 +85,7 @@ namespace APICallHandler
                 !int.TryParse(context.Request.Query["page"].ToString(), out int page)) page = 0;
                 if (!context.Request.Query.ContainsKey("count") ||
                 !int.TryParse(context.Request.Query["count"].ToString(), out int count)) count = 100;
-                using ApplicationDbContext ctx = new ApplicationDbContext();
-                CookAPI api = new CookAPI(ctx);
+                CookAPI api = new CookAPI();
                 Models.Cook[] cooks = await api.GetAll(new AuthenticationToken(), page, count);
                 await context.Response.WriteAsJsonAsync(api.GetAll(new AuthenticationToken(), page, count));
             });
@@ -94,8 +98,7 @@ namespace APICallHandler
                 }
                 else
                 {
-                    using ApplicationDbContext ctx = new ApplicationDbContext();
-                    CookAPI api = new CookAPI(ctx);
+                    CookAPI api = new CookAPI();
                     await context.Response.WriteAsJsonAsync(api.GetOne(new AuthenticationToken(), id));
                 }
             });
@@ -108,8 +111,7 @@ namespace APICallHandler
                 }
                 else
                 {
-                    using ApplicationDbContext ctx = new ApplicationDbContext();
-                    CookAPI api = new CookAPI(ctx);
+                    CookAPI api = new CookAPI();
                     await context.Response.WriteAsJsonAsync(api.Delete(new AuthenticationToken(), id));
                 }
             });
@@ -123,8 +125,7 @@ namespace APICallHandler
                 else
                 {
                     var name = context.Request.Query["name"].ToString();
-                    using ApplicationDbContext ctx = new ApplicationDbContext();
-                    CookAPI api = new CookAPI(ctx);
+                    CookAPI api = new CookAPI();
                     await context.Response.WriteAsJsonAsync(api.Create(new AuthenticationToken(), name));
                 }
             });

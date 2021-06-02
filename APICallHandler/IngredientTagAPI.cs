@@ -15,7 +15,7 @@ namespace APICallHandler
 {
     public class IngredientTagAPI
     {
-        private readonly ApplicationDbContext _context; //Should this have an ApplicationDbContext?  Shouldn't this be dealt with elsewhere?
+        private readonly ApplicationDbContext _context;
 
         public IngredientTagAPI(ApplicationDbContext context) {
             this._context = context;
@@ -26,10 +26,10 @@ namespace APICallHandler
             Cook me;
             if(user.ApplicationWideId != 0)
             {
-                me = await new CookAPI(_context).GetOne(user, user.ApplicationWideId);
+                me = await new CookAPI().GetOne(user, user.ApplicationWideId);
             } else
             {
-                me = await new CookAPI(_context).GetOneByName(user, user.ApplicationWideName);
+                me = await new CookAPI().GetOneByName(user, user.ApplicationWideName);
             }
             if(me == null)
             {

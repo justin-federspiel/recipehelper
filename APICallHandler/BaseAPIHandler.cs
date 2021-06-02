@@ -10,7 +10,7 @@ namespace APICallHandler
     {
         public static object ProcessGeneric(APIAction action, string path, string body = "", string itemId = "", AuthenticationToken userToken = null)
         {
-            return new KeyValuePair<string, string>("result", "Hello, world!"); // "{'result': 'Hello, world!'}";
+            return new KeyValuePair<string, string>("result", "Hello, world!"); 
         }
 
         public static string ProcessGenericToXML(APIAction action, string path, string body = "", string itemId = "", AuthenticationToken userToken = null)

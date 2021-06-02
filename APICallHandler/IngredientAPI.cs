@@ -13,17 +13,16 @@ namespace APICallHandler
 {
     public class IngredientAPI
     {
-        private readonly ApplicationDbContext _context; //Should this have an ApplicationDbContext?  Shouldn't this be dealt with elsewhere?
         private static readonly int DEFAULT_PARTIAL_MATCH_COUNT = 8;
         private static readonly int MAX_PARTIAl_MATCH_COUNT = 100;
 
-        public IngredientAPI(ApplicationDbContext context)
-        {
-            this._context = context;
+        public IngredientAPI()
+        {            
         }
 
         public async Task<Ingredient[]> GetAll(AuthenticationToken user, int page = 0, int count = 100)
         {
+            using ApplicationDbContext _context = new ApplicationDbContext();
             var t = _context.Ingredients
                 .Skip(page * count)
                 .Take(count);
@@ -33,6 +32,7 @@ namespace APICallHandler
 
         public async Task<Ingredient[]> GetMatches(AuthenticationToken user, string partial, bool? mustBeginWithPartial, int count = 8)
         {
+            using ApplicationDbContext _context = new ApplicationDbContext();
             var i = _context.Ingredients
                 .Where(a => (mustBeginWithPartial ?? true) ? a.Name.StartsWith(partial) : a.Name.Contains(partial))
                 .Take(count);
@@ -42,12 +42,14 @@ namespace APICallHandler
 
         public async Task<Ingredient> GetOne(AuthenticationToken user, long id = 0)
         {
+            using ApplicationDbContext _context = new ApplicationDbContext();
             Ingredient result = await _context.Ingredients.SingleOrDefaultAsync(c => c.Id == id);
             return result;
         }
 
         public async Task<object> Create(AuthenticationToken user, string name = "")
         {
+            using ApplicationDbContext _context = new ApplicationDbContext();
             Ingredient makeMe = new Ingredient { Name = name };
             bool alreadyExists = (await _context.Ingredients.Where(i => i.Name == name).FirstOrDefaultAsync<Ingredient>() != null);
             if (alreadyExists)
@@ -69,7 +71,7 @@ namespace APICallHandler
                 if (!context.Request.Query.ContainsKey("count") ||
                 !int.TryParse(context.Request.Query["count"].ToString(), out int count)) count = 100;
                 using ApplicationDbContext ctx = new ApplicationDbContext();
-                IngredientAPI api = new IngredientAPI(ctx);
+                IngredientAPI api = new IngredientAPI();
                 Models.Ingredient[] ingredients = await api.GetAll(new AuthenticationToken(), page, count);
                 await context.Response.WriteAsJsonAsync(ingredients);
             }
@@ -83,8 +85,7 @@ namespace APICallHandler
                 }
                 else
                 {
-                    using ApplicationDbContext ctx = new ApplicationDbContext();
-                    IngredientAPI api = new IngredientAPI(ctx);
+                    IngredientAPI api = new IngredientAPI();
                     await context.Response.WriteAsJsonAsync(api.GetOne(new AuthenticationToken(), id));
                 }
             });
@@ -107,8 +108,8 @@ namespace APICallHandler
                             await context.Response.WriteAsJsonAsync(new { ResponseCode = 400, Message = "Invalid Ingredient count specified in request." });
                         }
                     }
-                    using ApplicationDbContext ctx = new ApplicationDbContext();
-                    IngredientAPI api = new IngredientAPI(ctx);
+                    
+                    IngredientAPI api = new IngredientAPI();
                     await context.Response.WriteAsJsonAsync(api.GetMatches(new AuthenticationToken(), partial, mustBeginWithPartial, count));
                 }
             });
@@ -122,9 +123,8 @@ namespace APICallHandler
                 }
                 else
                 {
-                    var name = context.Request.Query["name"].ToString();
-                    using ApplicationDbContext ctx = new ApplicationDbContext();
-                    IngredientAPI api = new IngredientAPI(ctx);
+                    var name = context.Request.Query["name"].ToString();                    
+                    IngredientAPI api = new IngredientAPI();
                     await context.Response.WriteAsJsonAsync(api.Create(new AuthenticationToken(), name));
                 }
             });

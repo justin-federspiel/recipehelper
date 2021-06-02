@@ -20,13 +20,6 @@ namespace APICallHandler
 {
     public class RecipeAPI
     {
-        //private readonly ApplicationDbContext _context; //Should this have an ApplicationDbContext?  Shouldn't this be dealt with elsewhere?        
-
-        /*public RecipeAPI(ApplicationDbContext context)
-        {
-            this._context = context;
-        }*/
-
         public RecipeAPI() { }
 
         public async Task<Recipe[]> GetAll(AuthenticationToken user, int page = 0, int count = 100)
@@ -231,10 +224,7 @@ namespace APICallHandler
                 updateMe.RecipeTags = RemoveDuplicateTags(thisRecipesTags);
             }
             
-            //Task task1 = _context.AddRangeAsync(updateMe.RecipeIngredients);
-            //Task task2 = _context.AddRangeAsync(updateMe.RecipeTags);
-            updateContext.Update(updateMe);
-            //await task1; await task2;
+            updateContext.Update(updateMe);            
             return await updateContext.SaveChangesAsync();
         }
 
