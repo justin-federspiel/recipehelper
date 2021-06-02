@@ -11,7 +11,7 @@
 *.sln.docstates
 
 # Config files (added by Justin)
-*/appsettings*json
+*/appsettings.json
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
