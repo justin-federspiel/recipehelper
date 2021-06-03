@@ -49,6 +49,7 @@ namespace WebListener
                 TagAPI.MapAPIEndpoints(endpoints);
                 IngredientTagAPI.MapAPIEndpoints(endpoints);
                 ShoppingListAPI.MapAPIEndpoints(endpoints);
+                MealPlanAPI.MapAPIEndpoints(endpoints);
             });
         }
     }
